@@ -22,9 +22,9 @@ const int MEMORY_PINS = 8;
 /*
  * Fibonacci program.
  * References: - https://youtu.be/a73ZXDJtU48?t=263
- * Restarts from scratch when Carry is set (calculation > 255)
+ * Restart from scratch when Carry is set (calculation > 255)
  */
-int FIBONACCI_PROGRAM[MEMORY_ADDRESSES /*4 digits*/][MEMORY_ADDRESSES_PINS /*4 digits*/+ MEMORY_PINS /*4 digits*/] = {
+int FIBONACCI_PROGRAM_1[MEMORY_ADDRESSES /*4 digits*/][MEMORY_ADDRESSES_PINS /*4 digits*/+ MEMORY_PINS /*4 digits*/] = {
   { 0, 0, 0, 0,    0, 1, 1, 0,    0, 0, 0, 1 }, // $0   LDI #1
   { 0, 0, 0, 1,    0, 1, 0, 1,    1, 1, 1, 0 }, // $1   STA $14
   { 0, 0, 1, 0,    0, 1, 0, 1,    1, 1, 1, 1 }, // $2   STA $15
@@ -41,6 +41,86 @@ int FIBONACCI_PROGRAM[MEMORY_ADDRESSES /*4 digits*/][MEMORY_ADDRESSES_PINS /*4 d
   { 1, 1, 0, 1,    0, 0, 0, 0,    0, 0, 0, 0 }, // $13
   { 1, 1, 1, 0,    0, 0, 0, 0,    0, 0, 0, 1 }, // $14
   { 1, 1, 1, 1,    0, 0, 0, 0,    0, 0, 0, 1 }, // $15
+};
+
+// Improved memory locations selection in order to ease understanding of what's going on
+int FIBONACCI_PROGRAM_2[MEMORY_ADDRESSES /*4 digits*/][MEMORY_ADDRESSES_PINS /*4 digits*/ + MEMORY_PINS /*4 digits*/] = {
+  { 0, 0, 0, 0,    0, 1, 1, 0,    0, 0, 0, 1 }, // $0   LDI #1
+  { 0, 0, 0, 1,    0, 1, 0, 1,    1, 1, 0, 1 }, // $1   STA $13
+  { 0, 0, 1, 0,    0, 1, 0, 1,    1, 1, 1, 0 }, // $2   STA $14
+  { 0, 0, 1, 1,    0, 0, 0, 1,    1, 1, 0, 1 }, // $3   LDA $13
+  { 0, 1, 0, 0,    0, 0, 1, 0,    1, 1, 1, 0 }, // $4   ADD $14
+  { 0, 1, 0, 1,    0, 1, 1, 1,    0, 0, 0, 0 }, // $5   JC  $0
+  { 0, 1, 1, 0,    1, 1, 1, 0,    1, 1, 1, 0 }, // $6   OUT
+  { 0, 1, 1, 1,    0, 1, 0, 1,    1, 1, 1, 1 }, // $7   STA $15
+  { 1, 0, 0, 0,    0, 0, 0, 1,    1, 1, 1, 0 }, // $8   LDA $14
+  { 1, 0, 0, 1,    0, 1, 0, 1,    1, 1, 0, 1 }, // $9   STA $13
+  { 1, 0, 1, 0,    0, 0, 0, 1,    1, 1, 1, 1 }, // $10  LDA $15
+  { 1, 0, 1, 1,    0, 1, 0, 1,    1, 1, 1, 0 }, // $11  STA $14
+  { 1, 1, 0, 0,    0, 1, 0, 0,    0, 0, 1, 1 }, // $12  JMP $3
+  { 1, 1, 0, 1,    0, 0, 0, 0,    0, 0, 0, 0 }, // $13
+  { 1, 1, 1, 0,    0, 0, 0, 0,    0, 0, 0, 0 }, // $14
+  { 1, 1, 1, 1,    0, 0, 0, 0,    0, 0, 0, 0 }, // $15
+};
+
+// Improved code for start of sequence; sequence end at 144.
+int FIBONACCI_PROGRAM_3[MEMORY_ADDRESSES /*4 digits*/][MEMORY_ADDRESSES_PINS /*4 digits*/ + MEMORY_PINS /*4 digits*/] = {
+  { 0, 0, 0, 0,    0, 1, 1, 0,    0, 0, 0, 1 }, // $0   LDI #1
+  { 0, 0, 0, 1,    0, 1, 0, 1,    1, 1, 1, 0 }, // $1   STA $14
+  { 0, 0, 1, 0,    0, 1, 1, 0,    0, 0, 0, 0 }, // $2   LDI #0
+  { 0, 0, 1, 1,    1, 1, 1, 0,    0, 0, 0, 0 }, // $3   OUT
+  { 0, 1, 0, 0,    0, 0, 1, 0,    1, 1, 1, 0 }, // $4   ADD $14
+  { 0, 1, 0, 1,    0, 1, 0, 1,    1, 1, 1, 1 }, // $5   STA $15
+  { 0, 1, 1, 0,    0, 0, 0, 1,    1, 1, 1, 0 }, // $6   LDA $14
+  { 0, 1, 1, 1,    0, 1, 0, 1,    1, 1, 0, 1 }, // $7   STA $13
+  { 1, 0, 0, 0,    0, 0, 0, 1,    1, 1, 1, 1 }, // $8   LDA $15
+  { 1, 0, 0, 1,    0, 1, 0, 1,    1, 1, 1, 0 }, // $9	  STA $14
+  { 1, 0, 1, 0,    0, 0, 0, 1,    1, 1, 0, 1 }, // $10  LDA $13
+  { 1, 0, 1, 1,    0, 1, 1, 1,    0, 0, 0, 0 }, // $11  JC  $0
+  { 1, 1, 0, 0,    0, 1, 0, 0,    0, 0, 1, 1 }, // $12  JMP $3
+  { 1, 1, 0, 1,    0, 0, 0, 0,    0, 0, 0, 0 }, // $13
+  { 1, 1, 1, 0,    0, 0, 0, 0,    0, 0, 0, 0 }, // $14
+  { 1, 1, 1, 1,    0, 0, 0, 0,    0, 0, 0, 0 }, // $15
+};
+
+// Best option as of 13.08.2022. Sequence start at 1; end at 233.
+int FIBONACCI_PROGRAM_4[MEMORY_ADDRESSES /*4 digits*/][MEMORY_ADDRESSES_PINS /*4 digits*/ + MEMORY_PINS /*4 digits*/] = {
+  { 0, 0, 0, 0,    0, 1, 1, 0,    0, 0, 0, 1 }, // $0   LDI #1
+  { 0, 0, 0, 1,    0, 1, 0, 1,    1, 1, 1, 0 }, // $1   STA $14
+  { 0, 0, 1, 0,    0, 1, 1, 0,    0, 0, 0, 0 }, // $2   LDI #0
+  { 0, 0, 1, 1,    0, 0, 1, 0,    1, 1, 1, 0 }, // $3   ADD $14
+  { 0, 1, 0, 0,    0, 1, 0, 1,    1, 1, 1, 1 }, // $4   STA $15
+  { 0, 1, 0, 1,    0, 1, 1, 1,    0, 0, 0, 0 }, // $5   JC  $0
+  { 0, 1, 1, 0,    1, 1, 1, 0,    0, 0, 0, 0 }, // $6   OUT
+  { 0, 1, 1, 1,    0, 0, 0, 1,    1, 1, 1, 0 }, // $7   LDA $14
+  { 1, 0, 0, 0,    0, 1, 0, 1,    1, 1, 0, 1 }, // $8   STA $13
+  { 1, 0, 0, 1,    0, 0, 0, 1,    1, 1, 1, 1 }, // $9   LDA $15
+  { 1, 0, 1, 0,    0, 1, 0, 1,    1, 1, 1, 0 }, // $10  STA $14
+  { 1, 0, 1, 1,    0, 0, 0, 1,    1, 1, 0, 1 }, // $11  LDA $13
+  { 1, 1, 0, 0,    0, 1, 0, 0,    0, 0, 1, 1 }, // $12  JMP $3
+  { 1, 1, 0, 1,    0, 0, 0, 0,    0, 0, 0, 0 }, // $13
+  { 1, 1, 1, 0,    0, 0, 0, 0,    0, 0, 0, 0 }, // $14
+  { 1, 1, 1, 1,    0, 0, 0, 0,    0, 0, 0, 0 }, // $15
+};
+
+// Work in progress as of 13.08.2022. Sequence start at 1; end at 233; after 233 --> 121 (121 + 256 = 377 (= 233 + 144))
+int FIBONACCI_PROGRAM_5[MEMORY_ADDRESSES /*4 digits*/][MEMORY_ADDRESSES_PINS /*4 digits*/ + MEMORY_PINS /*4 digits*/] = {
+  { 0, 0, 0, 0,    0, 1, 1, 0,    0, 0, 0, 1 }, // $0   LDI #1
+  { 0, 0, 0, 1,    0, 1, 0, 1,    1, 1, 1, 0 }, // $1   STA $14
+  { 0, 0, 1, 0,    0, 1, 1, 0,    0, 0, 0, 0 }, // $2   LDI #0
+  { 0, 0, 1, 1,    0, 0, 1, 0,    1, 1, 1, 0 }, // $3   ADD $14
+  { 0, 1, 0, 0,    1, 1, 1, 0,    0, 0, 0, 0 }, // $4   OUT
+  { 0, 1, 0, 1,    0, 1, 0, 1,    1, 1, 1, 1 }, // $5   STA $15
+  { 0, 1, 1, 0,    0, 1, 1, 1,    0, 0, 0, 0 }, // $6   JC  $0
+  { 0, 1, 1, 1,    0, 0, 0, 1,    1, 1, 1, 0 }, // $7   LDA $14
+  { 1, 0, 0, 0,    0, 1, 0, 1,    1, 1, 0, 1 }, // $8   STA $13
+  { 1, 0, 0, 1,    0, 0, 0, 1,    1, 1, 1, 1 }, // $9   LDA $15
+  { 1, 0, 1, 0,    0, 1, 0, 1,    1, 1, 1, 0 }, // $10  STA $14
+  { 1, 0, 1, 1,    0, 0, 0, 1,    1, 1, 0, 1 }, // $11  LDA $13
+  { 1, 1, 0, 0,    0, 1, 0, 0,    0, 0, 1, 1 }, // $12  JMP $3
+  { 1, 1, 0, 1,    0, 0, 0, 0,    0, 0, 0, 0 }, // $13
+  { 1, 1, 1, 0,    0, 0, 0, 0,    0, 0, 0, 0 }, // $14
+  { 1, 1, 1, 1,    0, 0, 0, 0,    0, 0, 0, 0 }, // $15
 };
 
 int COUNTER_PROGRAM[MEMORY_ADDRESSES][MEMORY_ADDRESSES_PINS + MEMORY_PINS] = {
@@ -62,6 +142,65 @@ int COUNTER_PROGRAM[MEMORY_ADDRESSES][MEMORY_ADDRESSES_PINS + MEMORY_PINS] = {
   { 1, 1, 1, 1,    0, 0, 0, 0,    0, 0, 0, 1 }, // $15
 };
 
+
+/*
+   Set Arduino pins for computer Program Mode
+*/
+void set_for_programming() {
+  digitalWrite(MEMORY_PROGRAMMING_MODE, HIGH);    // pin Program (HI) / Run (LO) mode
+  digitalWrite(START_STOP_CLOCK, HIGH);           // pin Clock on/off (clock active LO)
+  digitalWrite(WRITE_TO_MEMORY, HIGH);            // pin Write to Memory (active LO) (push button)
+  digitalWrite(RESET_COMPUTER, HIGH);             // pin Reset (active LO)
+
+  pinMode(MEMORY_PROGRAMMING_MODE, OUTPUT);
+  pinMode(START_STOP_CLOCK, OUTPUT);
+  pinMode(WRITE_TO_MEMORY, OUTPUT);
+  pinMode(RESET_COMPUTER, OUTPUT);
+
+  pinMode(MEMORY_PIN_0, OUTPUT);
+  pinMode(MEMORY_PIN_1, OUTPUT);
+  pinMode(MEMORY_PIN_2, OUTPUT);
+  pinMode(MEMORY_PIN_3, OUTPUT);
+  pinMode(MEMORY_PIN_4, OUTPUT);
+  pinMode(MEMORY_PIN_5, OUTPUT);
+  pinMode(MEMORY_PIN_6, OUTPUT);
+  pinMode(MEMORY_PIN_7, OUTPUT);
+  pinMode(MEMORY_ADDRESS_PIN_0, OUTPUT);
+  pinMode(MEMORY_ADDRESS_PIN_1, OUTPUT);
+  pinMode(MEMORY_ADDRESS_PIN_2, OUTPUT);
+  pinMode(MEMORY_ADDRESS_PIN_3, OUTPUT);
+  digitalWrite(MEMORY_PROGRAMMING_MODE, LOW); 
+}
+
+/*
+   Set Arduino pins for computer Run Mode
+*/
+void post_programming() {
+  digitalWrite(MEMORY_PROGRAMMING_MODE, HIGH);
+  delay(500);
+  digitalWrite(START_STOP_CLOCK, LOW);
+  digitalWrite(RESET_COMPUTER, HIGH);
+  digitalWrite(RESET_COMPUTER, LOW);
+  delay(500);
+  // porto a Input tutti i PIN così passano in HI-Z
+  pinMode(MEMORY_PROGRAMMING_MODE, INPUT);
+  pinMode(START_STOP_CLOCK, INPUT);
+  pinMode(WRITE_TO_MEMORY, INPUT);
+  pinMode(RESET_COMPUTER, INPUT);
+  pinMode(MEMORY_PIN_0, INPUT);
+  pinMode(MEMORY_PIN_1, INPUT);
+  pinMode(MEMORY_PIN_2, INPUT);
+  pinMode(MEMORY_PIN_3, INPUT);
+  pinMode(MEMORY_PIN_4, INPUT);
+  pinMode(MEMORY_PIN_5, INPUT);
+  pinMode(MEMORY_PIN_6, INPUT);
+  pinMode(MEMORY_PIN_7, INPUT);
+  pinMode(MEMORY_ADDRESS_PIN_0, INPUT);
+  pinMode(MEMORY_ADDRESS_PIN_1, INPUT);
+  pinMode(MEMORY_ADDRESS_PIN_2, INPUT);
+  pinMode(MEMORY_ADDRESS_PIN_3, INPUT);
+}
+
 /*
    Write a program to the memory.
 */
@@ -82,12 +221,11 @@ void writeProgram(int program[MEMORY_ADDRESSES][MEMORY_ADDRESSES_PINS + MEMORY_P
     digitalWrite(MEMORY_PIN_0, program[command][11]);
 
     digitalWrite(WRITE_TO_MEMORY, LOW);
-    delayMicroseconds(1);
+    delayMicroseconds(10);
     digitalWrite(WRITE_TO_MEMORY, HIGH);
     delay(250);
   }
 }
-
 
 /*
    Setup the Arduino program.
@@ -101,53 +239,16 @@ void writeProgram(int program[MEMORY_ADDRESSES][MEMORY_ADDRESSES_PINS + MEMORY_P
      - https://youtu.be/KNve2LCcSRc?t=900
 */
 void setup() {
-  pinMode(MEMORY_PROGRAMMING_MODE, OUTPUT);
-  pinMode(WRITE_TO_MEMORY, OUTPUT);
-  pinMode(RESET_COMPUTER, OUTPUT);
 
-  /*
-     porto a HI i TRI e THR del 555 bistabile di uscita così passo in modalità clock manuale
-     poi riporto il pin a INPUT così va in HI-Z
-  */
-  digitalWrite(START_STOP_CLOCK, HIGH);
-  pinMode(START_STOP_CLOCK, OUTPUT);
-  delay(200);
-  pinMode(START_STOP_CLOCK, INPUT);
-
-  pinMode(MEMORY_PIN_0, OUTPUT);
-  pinMode(MEMORY_PIN_1, OUTPUT);
-  pinMode(MEMORY_PIN_2, OUTPUT);
-  pinMode(MEMORY_PIN_3, OUTPUT);
-  pinMode(MEMORY_PIN_4, OUTPUT);
-  pinMode(MEMORY_PIN_5, OUTPUT);
-  pinMode(MEMORY_PIN_6, OUTPUT);
-  pinMode(MEMORY_PIN_7, OUTPUT);
-  pinMode(MEMORY_ADDRESS_PIN_0, OUTPUT);
-  pinMode(MEMORY_ADDRESS_PIN_1, OUTPUT);
-  pinMode(MEMORY_ADDRESS_PIN_2, OUTPUT);
-  pinMode(MEMORY_ADDRESS_PIN_3, OUTPUT);
-
-  digitalWrite(WRITE_TO_MEMORY, HIGH);
-  digitalWrite(MEMORY_PROGRAMMING_MODE, LOW);
-
-  writeProgram(FIBONACCI_PROGRAM);
-  // writeProgram(COUNTER_PROGRAM);
-
-  digitalWrite(MEMORY_PROGRAMMING_MODE, HIGH);
-  delay(1000);
-
-  /*
-     porto a LO i TRI e THR del 555 bistabile di uscita così passo in modalità clock automatico
-     poi riporto il pin a INPUT così va in HI-Z
-  */
-
-  digitalWrite(START_STOP_CLOCK, LOW);
-  pinMode(START_STOP_CLOCK, OUTPUT);
-  delay(200);
-  pinMode(START_STOP_CLOCK, INPUT);
-
-  digitalWrite(RESET_COMPUTER, HIGH);
-  digitalWrite(RESET_COMPUTER, LOW);
 }
 
-void loop() {}
+void loop() {
+  set_for_programming();
+  writeProgram(FIBONACCI_PROGRAM_4);
+  post_programming();
+  delay(90000);
+  set_for_programming();
+  writeProgram(COUNTER_PROGRAM);
+  post_programming();
+  delay(300000);
+}
