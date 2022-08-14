@@ -18,6 +18,9 @@
 const int MEMORY_ADDRESSES = 16;
 const int MEMORY_ADDRESSES_PINS = 4;
 const int MEMORY_PINS = 8;
+const int LEDS = 14; // array for KITT supercar LEDs effect
+const int PINS = 8;
+
 
 /*
  * Fibonacci program.
@@ -101,6 +104,8 @@ int FIBONACCI_PROGRAM_4[MEMORY_ADDRESSES /*4 digits*/][MEMORY_ADDRESSES_PINS /*4
   { 1, 1, 0, 1,    0, 0, 0, 0,    0, 0, 0, 0 }, // $13
   { 1, 1, 1, 0,    0, 0, 0, 0,    0, 0, 0, 0 }, // $14
   { 1, 1, 1, 1,    0, 0, 0, 0,    0, 0, 0, 0 }, // $15
+  //  { 1, 1, 1, 1,    1, 0, 1, 0,    1, 0, 1, 0 }, // $15 PATTERN for test only
+
 };
 
 // Work in progress as of 13.08.2022. Sequence start at 1; end at 233; after 233 --> 121 (121 + 256 = 377 (= 233 + 144))
@@ -177,11 +182,11 @@ void set_for_programming() {
 */
 void post_programming() {
   digitalWrite(MEMORY_PROGRAMMING_MODE, HIGH);
-  delay(500);
+  //~ delay(10);
   digitalWrite(START_STOP_CLOCK, LOW);
   digitalWrite(RESET_COMPUTER, HIGH);
   digitalWrite(RESET_COMPUTER, LOW);
-  delay(500);
+  delay(10);
   // porto a Input tutti i PIN così passano in HI-Z
   pinMode(MEMORY_PROGRAMMING_MODE, INPUT);
   pinMode(START_STOP_CLOCK, INPUT);
@@ -202,7 +207,7 @@ void post_programming() {
 }
 
 /*
-   Write a program to the memory.
+   Write a program to memory.
 */
 void writeProgram(int program[MEMORY_ADDRESSES][MEMORY_ADDRESSES_PINS + MEMORY_PINS]) {
   for (int command = 0; command < MEMORY_ADDRESSES; command += 1) {
@@ -210,7 +215,6 @@ void writeProgram(int program[MEMORY_ADDRESSES][MEMORY_ADDRESSES_PINS + MEMORY_P
     digitalWrite(MEMORY_ADDRESS_PIN_2, program[command][1]);
     digitalWrite(MEMORY_ADDRESS_PIN_1, program[command][2]);
     digitalWrite(MEMORY_ADDRESS_PIN_0, program[command][3]);
-
     digitalWrite(MEMORY_PIN_7, program[command][4]);
     digitalWrite(MEMORY_PIN_6, program[command][5]);
     digitalWrite(MEMORY_PIN_5, program[command][6]);
@@ -219,13 +223,94 @@ void writeProgram(int program[MEMORY_ADDRESSES][MEMORY_ADDRESSES_PINS + MEMORY_P
     digitalWrite(MEMORY_PIN_2, program[command][9]);
     digitalWrite(MEMORY_PIN_1, program[command][10]);
     digitalWrite(MEMORY_PIN_0, program[command][11]);
-
     digitalWrite(WRITE_TO_MEMORY, LOW);
     delayMicroseconds(10);
     digitalWrite(WRITE_TO_MEMORY, HIGH);
-    delay(250);
+    delay(150);
   }
 }
+
+
+////////////////////////////////////////////////////////////
+////////////// KITT supercar LEDs effect ///////////////////
+////////////////////////////////////////////////////////////
+
+int KITT[LEDS][PINS] = {
+  { 0, 0, 0, 0, 0, 0, 0, 1 },
+  { 0, 0, 0, 0, 0, 0, 1, 0 },
+  { 0, 0, 0, 0, 0, 1, 0, 0 },
+  { 0, 0, 0, 0, 1, 0, 0, 0 },
+  { 0, 0, 0, 1, 0, 0, 0, 0 },
+  { 0, 0, 1, 0, 0, 0, 0, 0 },
+  { 0, 1, 0, 0, 0, 0, 0, 0 },
+  { 1, 0, 0, 0, 0, 0, 0, 0 },
+  { 0, 1, 0, 0, 0, 0, 0, 0 },
+  { 0, 0, 1, 0, 0, 0, 0, 0 },
+  { 0, 0, 0, 1, 0, 0, 0, 0 },
+  { 0, 0, 0, 0, 1, 0, 0, 0 },
+  { 0, 0, 0, 0, 0, 1, 0, 0 },
+  { 0, 0, 0, 0, 0, 0, 1, 0 },
+  //~ { 0, 0, 0, 0, 0, 0, 0, 1 },
+  //~ { 0, 0, 0, 0, 0, 0, 0, 0 },
+};
+
+/*
+   LEDs moving as KITT supercar; shown at end of programming
+*/
+void writeKitt(int led_array[LEDS][PINS]) {
+  //~ Save content of memory address $15 because it is used for LED effect
+  digitalWrite(MEMORY_ADDRESS_PIN_3, 1);
+  digitalWrite(MEMORY_ADDRESS_PIN_2, 1);
+  digitalWrite(MEMORY_ADDRESS_PIN_1, 1);
+  digitalWrite(MEMORY_ADDRESS_PIN_0, 1);
+  for (int pin = MEMORY_PIN_7; pin >= MEMORY_PIN_0; pin -= 1) {
+    pinMode(pin, INPUT);
+    led_array[16][pin] = digitalRead(pin);
+    pinMode(pin, OUTPUT);
+//    Serial.println("\n+++++++++++++++++++++++++++++");
+//    Serial.print("Numero pin: ");
+//    Serial.print(pin);
+//    Serial.print("; ");
+//    Serial.print("Valore: ");
+//    Serial.println(led_array[16][pin]);
+  }
+
+  //~ Actual LEDs effect
+  for (int times = 1; times <= 3; times += 1) {
+    for (int led_sequence = 0; led_sequence < LEDS; led_sequence += 1) {
+      digitalWrite(MEMORY_ADDRESS_PIN_3, 1);
+      digitalWrite(MEMORY_ADDRESS_PIN_2, 1);
+      digitalWrite(MEMORY_ADDRESS_PIN_1, 1);
+      digitalWrite(MEMORY_ADDRESS_PIN_0, 1);
+      digitalWrite(MEMORY_PIN_7, led_array[led_sequence][0]);
+      digitalWrite(MEMORY_PIN_6, led_array[led_sequence][1]);
+      digitalWrite(MEMORY_PIN_5, led_array[led_sequence][2]);
+      digitalWrite(MEMORY_PIN_4, led_array[led_sequence][3]);
+      digitalWrite(MEMORY_PIN_3, led_array[led_sequence][4]);
+      digitalWrite(MEMORY_PIN_2, led_array[led_sequence][5]);
+      digitalWrite(MEMORY_PIN_1, led_array[led_sequence][6]);
+      digitalWrite(MEMORY_PIN_0, led_array[led_sequence][7]);
+      digitalWrite(WRITE_TO_MEMORY, LOW);
+      delayMicroseconds(10);
+      digitalWrite(WRITE_TO_MEMORY, HIGH);
+      delay(60);
+    }
+  }
+  //~ Restore content of memory address $15
+  digitalWrite(MEMORY_ADDRESS_PIN_3, 1);
+  digitalWrite(MEMORY_ADDRESS_PIN_2, 1);
+  digitalWrite(MEMORY_ADDRESS_PIN_1, 1);
+  digitalWrite(MEMORY_ADDRESS_PIN_0, 1);
+  for (int pin = MEMORY_PIN_7; pin >= MEMORY_PIN_0; pin -= 1) {
+    digitalWrite(pin, led_array[16][pin]);
+    digitalWrite(WRITE_TO_MEMORY, LOW);
+    delayMicroseconds(10);
+    digitalWrite(WRITE_TO_MEMORY, HIGH);
+    delay(10);
+  }
+  //~ delay(500);
+}
+
 
 /*
    Setup the Arduino program.
@@ -239,16 +324,19 @@ void writeProgram(int program[MEMORY_ADDRESSES][MEMORY_ADDRESSES_PINS + MEMORY_P
      - https://youtu.be/KNve2LCcSRc?t=900
 */
 void setup() {
-
+  Serial.begin(115200);
+  delay(300);
 }
 
 void loop() {
   set_for_programming();
   writeProgram(FIBONACCI_PROGRAM_4);
+  writeKitt(KITT);
   post_programming();
-  delay(90000);
+  delay(120000);
   set_for_programming();
   writeProgram(COUNTER_PROGRAM);
+  writeKitt(KITT);
   post_programming();
-  delay(300000);
+  delay(240000);
 }
